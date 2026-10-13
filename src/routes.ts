@@ -1,6 +1,9 @@
 import { Router } from "express";
-import alerts from "./alerts.ts";
+import { getPrice, priceAlert } from "./alerts.ts";
 
 const router = Router();
 
-router.use("/alerts", alerts);
+router.get("/alerts", getPrice);
+router.post("/alerts", priceAlert);
+
+export default router;
