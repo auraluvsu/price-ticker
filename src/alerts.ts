@@ -76,7 +76,7 @@ const pairMatch = (tick: Tick, a: Pair) => {
     else return;
 };
 
-export async function triggerAlert(tick: Tick) {
+export async function checkAlert(tick: Tick) {
     for (const a of alerts) {
         if (pairMatch(tick, a)) {
             if (tick.price > a.price) {
