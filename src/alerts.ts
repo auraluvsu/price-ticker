@@ -1,24 +1,11 @@
 import { Request, Response } from "express";
+import { Pair } from "./types.ts";
 
-type TickerSymbol = "XAUUSD" | "NAS100" | "XAGUSD" | "SPX500";
-type Direction = "bear" | "bull";
-
-type TickerAlert = {
-    direction: Direction;
-    alertPrice: number;
+const assertPair = (body: any): body is Pair => {
+    return body.symbol !== undefined && body.price !== undefined && body.direction !== undefined;
 };
 
-type Pair = {
-    id: number;
-    symbol: TickerSymbol;
-    price: number;
-};
-
-const alerts: Partial<Record<TickerSymbol, number>> = {};
-alerts.NAS100 = 30000;
-alerts.XAUUSD = 4100;
-alerts.SPX500 = 8000;
-alerts.XAGUSD = 80;
+const alerts: Pair[] = [];
 
 export async function getPrice(req: Request, res: Response) {
     const key = req.header("secret-key");
@@ -30,21 +17,42 @@ export async function priceAlert(req: Request, res: Response) {
     try {
         const body: Pair = req.body;
         console.log("Pair:", body);
+        if (!assertPair(body)) throw new Error("Body is not of type Pair");
         switch (body.symbol) {
             case "XAUUSD":
-                alerts.XAUUSD = body.price;
+                alerts.push({
+                    id: alerts.length + 1,
+                    direction: body.direction,
+                    symbol: body.symbol,
+                    price: body.price,
+                });
                 res.status(201).json({ status: `created alert for ${body.price}` });
                 break;
             case "NAS100":
-                alerts.NAS100 = body.price;
+                alerts.push({
+                    id: alerts.length + 1,
+                    direction: body.direction,
+                    symbol: body.symbol,
+                    price: body.price,
+                });
                 res.status(201).json({ status: `created alert for ${body.price}` });
                 break;
             case "XAGUSD":
-                alerts.XAGUSD = body.price;
+                alerts.push({
+                    id: alerts.length + 1,
+                    direction: body.direction,
+                    symbol: body.symbol,
+                    price: body.price,
+                });
                 res.status(201).json({ status: `created alert for ${body.price}` });
                 break;
             case "SPX500":
-                alerts.SPX500 = body.price;
+                alerts.push({
+                    id: alerts.length + 1,
+                    direction: body.direction,
+                    symbol: body.symbol,
+                    price: body.price,
+                });
                 res.status(201).json({ status: `created alert for ${body.price}` });
                 break;
             default:
@@ -54,7 +62,7 @@ export async function priceAlert(req: Request, res: Response) {
         }
     } catch (e) {
         console.log("There was an error:", e);
-        res.status(500).json({ error: "Unknown server error" });
+        res.status(500).json({ error: e });
     }
 }
 
