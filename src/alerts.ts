@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Pair } from "./types.ts";
+import { Pair, Tick } from "./types.ts";
 
 const assertPair = (body: any): body is Pair => {
     return body.symbol !== undefined && body.price !== undefined && body.direction !== undefined;
@@ -13,7 +13,7 @@ export async function getPrice(req: Request, res: Response) {
     res.status(200).send(JSON.stringify(alerts));
 }
 
-export async function priceAlert(req: Request, res: Response) {
+export async function createPriceAlert(req: Request, res: Response) {
     try {
         const body: Pair = req.body;
         console.log("Pair:", body);
@@ -21,7 +21,7 @@ export async function priceAlert(req: Request, res: Response) {
         switch (body.symbol) {
             case "XAUUSD":
                 alerts.push({
-                    id: alerts.length + 1,
+                    id: body.id,
                     direction: body.direction,
                     symbol: body.symbol,
                     price: body.price,
@@ -30,7 +30,7 @@ export async function priceAlert(req: Request, res: Response) {
                 break;
             case "NAS100":
                 alerts.push({
-                    id: alerts.length + 1,
+                    id: body.id,
                     direction: body.direction,
                     symbol: body.symbol,
                     price: body.price,
@@ -39,7 +39,7 @@ export async function priceAlert(req: Request, res: Response) {
                 break;
             case "XAGUSD":
                 alerts.push({
-                    id: alerts.length + 1,
+                    id: body.id,
                     direction: body.direction,
                     symbol: body.symbol,
                     price: body.price,
@@ -48,7 +48,7 @@ export async function priceAlert(req: Request, res: Response) {
                 break;
             case "SPX500":
                 alerts.push({
-                    id: alerts.length + 1,
+                    id: body.id,
                     direction: body.direction,
                     symbol: body.symbol,
                     price: body.price,
@@ -63,6 +63,30 @@ export async function priceAlert(req: Request, res: Response) {
     } catch (e) {
         console.log("There was an error:", e);
         res.status(500).json({ error: e });
+    }
+}
+
+const direction = (tick: Tick, a: Pair) => {
+    return tick.direction === a.direction;
+};
+
+const pairMatch = (tick: Tick, a: Pair) => {
+    if (direction(tick, a) && tick.direction === "bear") return false;
+    else if (direction(tick, a) && tick.direction === "bull") return true;
+    else return;
+};
+
+export async function triggerAlert(tick: Tick) {
+    for (const a of alerts) {
+        if (pairMatch(tick, a)) {
+            if (tick.price > a.price) {
+                console.log("ALERT TRIGGERED:", a);
+            } else return;
+        } else if (!pairMatch(tick, a)) {
+            if (tick.price > a.price) {
+                console.log("ALERT TRIGGERED:", a);
+            } else return;
+        }
     }
 }
 
