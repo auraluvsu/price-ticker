@@ -9,8 +9,8 @@ const alerts: Pair[] = [];
 
 export async function getPrice(req: Request, res: Response) {
     const key = req.header("secret-key");
-    if (key !== process.env.secret!) res.status(401).send("Unauthorized");
-    res.status(200).send(JSON.stringify(alerts));
+    if (key !== process.env.secret!) res.status(401).json({ error: "Unauthorized" });
+    res.status(200).json({ body: alerts });
 }
 
 export async function createPriceAlert(req: Request, res: Response) {
